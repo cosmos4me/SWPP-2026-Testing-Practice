@@ -37,11 +37,22 @@ android {
     }
 
     compileOptions {
+        // java.time (LocalDate) needs desugaring below API 26
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
     kotlinOptions {
         jvmTarget = "11"
+    }
+}
+
+androidComponents {
+    onVariants { variant ->
+        // Test APK only: mockk-android loads its JVMTI agent (libmockkjvmtiagent.so) from the
+        // test APK. The app itself has no native libs, so the runtime does not search inside
+        // the test APK; the .so must be extracted to disk (legacy packaging) to be found.
+        variant.androidTest?.packaging?.jniLibs?.useLegacyPackaging?.set(true)
     }
 }
 
@@ -75,6 +86,8 @@ dependencies {
 
     // timber
     implementation("com.jakewharton.timber:timber:5.0.1")
+    // java.time support for minSdk 24
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
 
 
     // Testing
@@ -87,6 +100,12 @@ dependencies {
     androidTestImplementation("androidx.test:runner:1.7.0")
     androidTestImplementation("androidx.test:rules:1.7.0")
     androidTestImplementation(kotlin("test"))
+    // Freeze LocalDate.now() in binding tests without changing production code.
+    androidTestImplementation("io.mockk:mockk-android:1.13.13") {
+        // These tests use AndroidJUnit4; avoid unused JUnit 5 resources in the APK.
+        exclude(group = "org.junit.jupiter")
+        exclude(group = "org.junit.platform")
+    }
     androidTestImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
     androidTestImplementation ("org.mockito:mockito-core:5.18.0")
     androidTestImplementation ("com.linkedin.dexmaker:dexmaker-mockito:2.28.3")
