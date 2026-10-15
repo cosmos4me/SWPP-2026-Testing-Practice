@@ -47,6 +47,15 @@ android {
     }
 }
 
+androidComponents {
+    onVariants { variant ->
+        // Test APK only: mockk-android loads its JVMTI agent (libmockkjvmtiagent.so) from the
+        // test APK. The app itself has no native libs, so the runtime does not search inside
+        // the test APK; the .so must be extracted to disk (legacy packaging) to be found.
+        variant.androidTest?.packaging?.jniLibs?.useLegacyPackaging?.set(true)
+    }
+}
+
 dependencies {
 
     implementation(libs.androidx.core.ktx)
