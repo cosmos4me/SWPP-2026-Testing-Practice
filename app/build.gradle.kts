@@ -91,6 +91,12 @@ dependencies {
     androidTestImplementation("androidx.test:runner:1.7.0")
     androidTestImplementation("androidx.test:rules:1.7.0")
     androidTestImplementation(kotlin("test"))
+    // Freeze LocalDate.now() in binding tests without changing production code.
+    androidTestImplementation("io.mockk:mockk-android:1.13.13") {
+        // These tests use AndroidJUnit4; avoid unused JUnit 5 resources in the APK.
+        exclude(group = "org.junit.jupiter")
+        exclude(group = "org.junit.platform")
+    }
     androidTestImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
     androidTestImplementation ("org.mockito:mockito-core:5.18.0")
     androidTestImplementation ("com.linkedin.dexmaker:dexmaker-mockito:2.28.3")
